@@ -5,37 +5,34 @@ public class PlacementZone : InteractableBase
 {
     [Header("放置点设置")]
     public Transform snapPoint; // 放置的精准位置点（建议建一个空物体作为子物体拖进来）
-    
+
     [Header("准入名单")]
     [Tooltip("允许放置的物体名称列表。如果列表为空，则允许放置任何 HoldableItem。")]
-    public List<string> allowedItemNames = new List<string>(); 
+    public List<string> allowedItemNames = new List<string>();
 
     // 🌟 核心：只有当手里有东西、没被占用、且东西在名单内时，才允许交互
-    public override bool CanInteract 
+    public override bool CanInteract
     {
-        get 
+        get
         {
-            // 1. 全局锁定检查
-            if (PlayerInteractionUI.IsGlobalLocked) return false;
-
-            // 2. 必须手里拿了东西才能放
+            // 1. 必须手里拿了东西才能放
             if (!PlayerHand.Instance.HasItem) return false;
 
-            // 3. 🌟 占用检查：如果已经有东西了，不允许再放
+            // 2. 🌟 占用检查：如果已经有东西了，不允许再放
             if (IsOccupied()) return false;
 
-            // 4. 🌟 名单检查：检查手里拿的是不是你要的那个东西
+            // 3. 🌟 名单检查：检查手里拿的是不是你要的那个东西
             return IsItemAllowed(PlayerHand.Instance.currentItem);
         }
     }
 
     // 动态提示文字
-    public override string InteractionPrompt 
+    public override string InteractionPrompt
     {
-        get 
+        get
         {
             if (IsOccupied()) return "位置已满";
-            
+
             // 如果手里有东西但名单不对
             if (PlayerHand.Instance.HasItem && !IsItemAllowed(PlayerHand.Instance.currentItem))
                 return "此处不匹配该物品";
@@ -58,7 +55,7 @@ public class PlacementZone : InteractableBase
 
         // 2. 物理锁定：必须在 SetParent 之前或之后立即处理，防止它乱滚
         Rigidbody rb = itemToPlace.GetComponent<Rigidbody>();
-        if (rb != null) 
+        if (rb != null)
         {
             rb.isKinematic = true;
             rb.useGravity = false;
@@ -66,7 +63,7 @@ public class PlacementZone : InteractableBase
 
         // 3. 🌟 精准吸附并建立父子关系
         // 这样 IsOccupied 就能通过检测 snapPoint 的子物体数量来判断占用
-        itemToPlace.transform.SetParent(snapPoint); 
+        itemToPlace.transform.SetParent(snapPoint);
         itemToPlace.transform.localPosition = Vector3.zero;
         itemToPlace.transform.localRotation = Quaternion.identity;
 

@@ -3,17 +3,17 @@ using TMPro;
 
 public class PlayerInteractionUI : MonoBehaviour
 {
-    public static bool IsGlobalLocked = false; 
-    public static bool IsFirstPerson = false; 
+    public static bool IsGlobalLocked = false;
+    public static bool IsFirstPerson = false;
 
-    public float interactRange = 6f;        
-    public float seatedInteractRange = 2f;  
+    public float interactRange = 6f;
+    public float seatedInteractRange = 2f;
 
-    public LayerMask standInteractLayer;      
-    public LayerMask seatedInteractLayer;     
+    public LayerMask standInteractLayer;
+    public LayerMask seatedInteractLayer;
 
     public TextMeshProUGUI promptText; // 现在这个 text 只显示交互物体的文字
-    public GameObject crosshairImage; 
+    public GameObject crosshairImage;
 
     private IInteractable currentInteractable;
 
@@ -21,20 +21,20 @@ public class PlayerInteractionUI : MonoBehaviour
     {
         LayerMask currentLayerMask = IsFirstPerson ? seatedInteractLayer : standInteractLayer;
 
-        if (IsGlobalLocked) 
+        if (IsGlobalLocked)
         {
-            if (Cursor.lockState == CursorLockMode.None) 
+            if (Cursor.lockState == CursorLockMode.None)
             {
                 if (crosshairImage != null) crosshairImage.SetActive(false);
-                MouseRaycastCheck(currentLayerMask); 
-                
+                MouseRaycastCheck(currentLayerMask);
+
                 if (Input.GetMouseButtonDown(0) && currentInteractable != null)
                 {
                     // 🌟 核心修正：当点下鼠标，直接触发物体的交互
                     currentInteractable.Interact();
                 }
             }
-            return; 
+            return;
         }
 
         bool canAimAndInteract = IsFirstPerson || Input.GetMouseButton(1);
@@ -49,7 +49,7 @@ public class PlayerInteractionUI : MonoBehaviour
             currentInteractable.Interact();
         }
     }
-    
+
     void MouseRaycastCheck(LayerMask filterMask)
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -59,9 +59,6 @@ public class PlayerInteractionUI : MonoBehaviour
         if (Physics.Raycast(ray, out hit, dist, filterMask))
         {
             ProcessInteractable(hit.collider.GetComponent<IInteractable>());
-            // 文字跟随鼠标
-            if (promptText != null && currentInteractable != null)
-                promptText.transform.position = Input.mousePosition + new Vector3(20, -20, 0);
         }
         else { ClearInteraction(); }
     }
@@ -89,7 +86,7 @@ public class PlayerInteractionUI : MonoBehaviour
                 currentInteractable = interactable;
                 currentInteractable.OnHover();
             }
-            
+
             // 🌟 只显示物体的交互提示（如 "放置物品" 或 "打开抽屉"）
             if (promptText != null) promptText.text = interactable.InteractionPrompt;
         }
@@ -106,6 +103,6 @@ public class PlayerInteractionUI : MonoBehaviour
     void ClearInteraction()
     {
         if (currentInteractable != null) { currentInteractable.OnExit(); currentInteractable = null; }
-        if (promptText != null) promptText.text = ""; 
+        if (promptText != null) promptText.text = "";
     }
 }
