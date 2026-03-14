@@ -5,6 +5,7 @@ public class PlayerInteractionUI : MonoBehaviour
 {
     public static bool IsGlobalLocked = false;
     public static bool IsFirstPerson = false;
+    public static Transform InteractionFocus = null;
 
     public float interactRange = 6f;
     public float seatedInteractRange = 2f;
@@ -56,9 +57,21 @@ public class PlayerInteractionUI : MonoBehaviour
         RaycastHit hit;
         float dist = IsFirstPerson ? seatedInteractRange : interactRange;
 
-        if (Physics.Raycast(ray, out hit, dist, filterMask))
+        // 🌟 核心修改：移除这里的 filterMask，让射线能撞击任何有 Collider 的物体
+        // 或者使用一个包含“建筑/环境”和“交互层”的组合 Mask
+        if (Physics.Raycast(ray, out hit, dist)) 
         {
-            ProcessInteractable(hit.collider.GetComponent<IInteractable>());
+            // 检查撞击到的物体是否在我们的交互层级中
+            // 使用位运算：(1 << layer) & mask
+            if (((1 << hit.collider.gameObject.layer) & filterMask) != 0)
+            {
+                ProcessInteractable(hit.collider.GetComponent<IInteractable>());
+            }
+            else
+            {
+                // 如果撞到了东西（比如桌面），但它不是交互层，就清除交互
+                ClearInteraction();
+            }
         }
         else { ClearInteraction(); }
     }
@@ -69,9 +82,17 @@ public class PlayerInteractionUI : MonoBehaviour
         RaycastHit hit;
         float dist = IsFirstPerson ? seatedInteractRange : interactRange;
 
-        if (Physics.Raycast(ray, out hit, dist, filterMask))
+        // 🌟 不带 mask 进行检测，确保桌面能挡住射线
+        if (Physics.Raycast(ray, out hit, dist))
         {
-            ProcessInteractable(hit.collider.GetComponent<IInteractable>());
+            if (((1 << hit.collider.gameObject.layer) & filterMask) != 0)
+            {
+                ProcessInteractable(hit.collider.GetComponent<IInteractable>());
+            }
+            else
+            {
+                ClearInteraction();
+            }
         }
         else { ClearInteraction(); }
     }
