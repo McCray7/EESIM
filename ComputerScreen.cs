@@ -8,24 +8,25 @@ public class ComputerScreen : InteractableBase
     public CinemachineVirtualCamera monitorVcam;
     public CanvasGroup screenCanvasGroup; 
     public GameObject interactionUI;
+    public ComputerLogin computerOS;
 
     [Header("设置")]
     public float fadeSpeed = 2f; 
     public AudioSource audioSource; 
     public AudioClip startupSound;  
+    public AudioClip shutdownSound; // 🌟 新增：关机音效
 
     private bool isFocusing = false;
     private bool isPowerOn = false; 
     private Coroutine fadeCoroutine;
 
-    // 只要没进入特写且全局未锁定，就允许交互（坐下后 Layer 切换会自动处理权限）
     public override bool CanInteract => !isFocusing && !PlayerInteractionUI.IsGlobalLocked;
     public override string InteractionPrompt => "左键 进入办公模式";
 
     public override void Interact()
     {
         isFocusing = true;
-        PlayerInteractionUI.IsGlobalLocked = true; // 锁定UI和鼠标
+        PlayerInteractionUI.IsGlobalLocked = true; 
         if (monitorVcam != null) { monitorVcam.gameObject.SetActive(true); monitorVcam.Priority = 100; }
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -35,7 +36,19 @@ public class ComputerScreen : InteractableBase
     public void TogglePower()
     {
         isPowerOn = !isPowerOn;
-        if (isPowerOn && audioSource != null && startupSound != null) audioSource.PlayOneShot(startupSound);
+
+        // 🌟 修改：根据开关状态播放对应的音效
+        if (audioSource != null)
+        {
+            if (isPowerOn)
+            {
+                if (startupSound != null) audioSource.PlayOneShot(startupSound);
+            }
+            else
+            {
+                if (shutdownSound != null) audioSource.PlayOneShot(shutdownSound);
+            }
+        }
         
         if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
         fadeCoroutine = StartCoroutine(FadeScreen(isPowerOn ? 1f : 0f));

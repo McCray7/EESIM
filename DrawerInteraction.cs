@@ -3,6 +3,8 @@ using System.Collections;
 
 public class DrawerInteraction : InteractableBase
 {
+    public static DrawerInteraction ActiveDrawer { get; private set; }
+
     [Header("设置")]
     public GameObject drawerCamera; 
     public Transform drawerTransform; 
@@ -42,28 +44,24 @@ public class DrawerInteraction : InteractableBase
     {
         if (!isOpened)
         {
-            isOpened = true;
-            targetPos = closedPos + openOffset;
-            PlayerInteractionUI.IsGlobalLocked = true; // 锁定后进入鼠标点击模式
-            if (drawerCamera != null) drawerCamera.SetActive(true);
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            OpenDrawer();
         }
         else
         {
-            isOpened = false;
-            targetPos = closedPos;
-            PlayerInteractionUI.IsGlobalLocked = false; // 解锁恢复正常模式
-            if (drawerCamera != null) drawerCamera.SetActive(false);
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            CloseDrawer();
         }
     }
 
     public void OpenDrawer()
     {
+        if (ActiveDrawer != null && ActiveDrawer != this)
+        {
+            ActiveDrawer.CloseDrawer();
+        }
+
         isOpened = true;
         targetPos = closedPos + openOffset;
+        ActiveDrawer = this;
         PlayerInteractionUI.IsGlobalLocked = true;
         if (drawerCamera != null) drawerCamera.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
@@ -75,6 +73,12 @@ public class DrawerInteraction : InteractableBase
         isOpened = false;
         targetPos = closedPos;
         if (drawerCamera != null) drawerCamera.SetActive(false);
+
+        if (ActiveDrawer == this)
+        {
+            ActiveDrawer = null;
+        }
+
         PlayerInteractionUI.IsGlobalLocked = false;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;

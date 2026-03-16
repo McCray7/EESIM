@@ -5,6 +5,10 @@ using Cinemachine;
 
 public class WorkStation : MonoBehaviour
 {
+    [Header("工位身份")]
+    public string workstationID; // 自动获取的 ID
+    public WorkStationNameplate nameplate; // 拖入子物体中的姓名牌脚本
+    
     [Header("引用")]
     public GameObject player;
     public Camera mainCam;
@@ -32,6 +36,11 @@ public class WorkStation : MonoBehaviour
 
     void Start()
     {
+        if (nameplate != null)
+        {
+            workstationID = nameplate.GetUniqueID(); 
+            Debug.Log($"工位已加载：[{workstationID}]");
+        }
         if (player != null)
         {
             controller = player.GetComponent("ThirdPersonController") as MonoBehaviour;

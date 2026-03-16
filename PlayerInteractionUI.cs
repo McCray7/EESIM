@@ -59,7 +59,7 @@ public class PlayerInteractionUI : MonoBehaviour
 
         // 🌟 核心修改：移除这里的 filterMask，让射线能撞击任何有 Collider 的物体
         // 或者使用一个包含“建筑/环境”和“交互层”的组合 Mask
-        if (Physics.Raycast(ray, out hit, dist)) 
+        if (Physics.Raycast(ray, out hit, dist))
         {
             // 检查撞击到的物体是否在我们的交互层级中
             // 使用位运算：(1 << layer) & mask
@@ -99,7 +99,7 @@ public class PlayerInteractionUI : MonoBehaviour
 
     void ProcessInteractable(IInteractable interactable)
     {
-        if (interactable != null && interactable.CanInteract)
+        if (interactable != null && interactable.CanInteract && IsInteractableAllowed(interactable))
         {
             if (currentInteractable != interactable)
             {
@@ -112,6 +112,18 @@ public class PlayerInteractionUI : MonoBehaviour
             if (promptText != null) promptText.text = interactable.InteractionPrompt;
         }
         else { ClearInteraction(); }
+    }
+
+    bool IsInteractableAllowed(IInteractable interactable)
+    {
+        DrawerInteraction activeDrawer = DrawerInteraction.ActiveDrawer;
+        if (activeDrawer == null) return true;
+
+        Component interactableComponent = interactable as Component;
+        if (interactableComponent == null) return false;
+
+        DrawerInteraction ownerDrawer = interactableComponent.GetComponentInParent<DrawerInteraction>();
+        return ownerDrawer == activeDrawer;
     }
 
     void ToggleUI(bool isActive)
