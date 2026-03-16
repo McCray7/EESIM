@@ -50,6 +50,11 @@ public class ComputerScreen : InteractableBase
             }
         }
         
+        if (computerOS != null)
+        {
+            computerOS.ApplyPowerState(isPowerOn);
+        }
+
         if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
         fadeCoroutine = StartCoroutine(FadeScreen(isPowerOn ? 1f : 0f));
     }
