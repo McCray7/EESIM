@@ -34,6 +34,7 @@ public class WorkStation : MonoBehaviour
     [Header("UI设置")]
     public GameObject interactionUI;
 
+
     void Start()
     {
         if (nameplate != null)
@@ -65,6 +66,7 @@ public class WorkStation : MonoBehaviour
             if (isWorking) StartCoroutine(ExitWorkRoutine());
             else if (isNear) StartCoroutine(EnterWorkRoutine());
         }
+
     }
 
     IEnumerator EnterWorkRoutine()

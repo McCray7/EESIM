@@ -19,6 +19,8 @@ public class ComputerLogin : MonoBehaviour
     public float fadeDuration = 0.5f;
 
     public bool IsLoggedIn { get; private set; }
+    public string CurrentEmployeeId { get; private set; }
+    public static string ActiveEmployeeId { get; private set; }
     private bool isPoweredOn;
     private Coroutine currentFadeCoroutine;
 
@@ -53,12 +55,14 @@ public class ComputerLogin : MonoBehaviour
         if (!isPoweredOn)
         {
             IsLoggedIn = false;
+            CurrentEmployeeId = string.Empty;
             StartTransition(null); 
             ClearInputs();
             return;
         }
 
         IsLoggedIn = false;
+        CurrentEmployeeId = string.Empty;
         StartTransition(loginCanvasGroup);
         ClearInputs();
         SetMessage("请输入工号以继续");
@@ -75,6 +79,8 @@ public class ComputerLogin : MonoBehaviour
         if (employeeDb != null && employeeDb.ValidateLogin(enteredId, enteredPw))
         {
             IsLoggedIn = true;
+            CurrentEmployeeId = enteredId;
+            ActiveEmployeeId = enteredId;
             StartTransition(desktopCanvasGroup);
             SetMessage(string.Empty);
         }
